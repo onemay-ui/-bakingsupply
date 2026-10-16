@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baking Master 烘焙單字王</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Fredoka', sans-serif;
+            background-color: #FFFBEB; /* Amber 50 */
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-animation {
+            animation: pulse-slow 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <!-- Navbar / Header -->
+    <header class="bg-amber-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showScreen('home')">
+                <i class="fa-solid font-bold fa-wheat-awn text-2xl text-amber-200"></i>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wide">Baking Master 烘焙單字王</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="bg-amber-700 px-3 py-1 rounded-full text-xs md:text-sm font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-star text-yellow-300"></i>
+                    <span>積分: <span id="score">0</span></span>
+                </div>
+                <button onclick="toggleSlowSpeech()" id="slow-speech-btn" class="bg-amber-500 hover:bg-amber-400 text-xs px-2.5 py-1 rounded-lg transition font-medium flex items-center gap-1">
+                    <i class="fa-solid fa-turtle"></i> 慢速語音: <span id="slow-status">關</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4 flex flex-col">
+
+        <!-- HOME DASHBOARD -->
+        <div id="screen-home" class="space-y-6 my-auto py-6">
+            <div class="text-center space-y-2">
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">高職烘焙科專用 A1 英語練習</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-amber-900">選擇今日的烘焙挑戰 🥖</h2>
+                <p class="text-slate-600 text-sm md:text-base max-w-xl mx-auto">透過聽力、閱讀與口說練習，輕鬆掌握 42 個關鍵烘焙工具與食材單字！</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                <!-- Mode 1 Card -->
+                <div onclick="startMemoryGame()" class="bg-white rounded-2xl p-6 border-2 border-amber-200 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-clone"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">1. 廚房速記對對碰</h3>
+                        <p class="text-slate-500 text-sm">翻牌連結英文單字與中文，建立視覺與聽覺記憶。</p>
+                    </div>
+                    <div class="mt-6 flex items-center text-amber-600 font-bold text-sm">
+                        開始挑戰 <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 2 Card -->
+                <div onclick="startListeningGame()" class="bg-white rounded-2xl p-6 border-2 border-amber-200 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-headphones"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">2. 烘焙大廚點餐戰</h3>
+                        <p class="text-slate-500 text-sm">聆聽主廚指令，在限時內選出正確的烘焙工具與食材。</p>
+                    </div>
+                    <div class="mt-6 flex items-center text-orange-600 font-bold text-sm">
+                        開始挑戰 <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 3 Card -->
+                <div onclick="startSpeakingGame()" class="bg-white rounded-2xl p-6 border-2 border-amber-200 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-microphone"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">3. 魔法食譜口說解鎖</h3>
+                        <p class="text-slate-500 text-sm">用麥克風唸出英文食材，收集材料完成美味食譜。</p>
+                    </div>
+                    <div class="mt-6 flex items-center text-rose-600 font-bold text-sm">
+                        開始挑戰 <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vocabulary Quick Bank Button -->
+            <div class="text-center pt-4">
+                <button onclick="showScreen('vocab-bank')" class="bg-white hover:bg-amber-50 text-amber-800 border border-amber-300 font-semibold px-6 py-2.5 rounded-full shadow-sm text-sm transition inline-flex items-center gap-2">
+                    <i class="fa-solid fa-book"></i> 瀏覽完整 42 個單字庫
+                </button>
+            </div>
+        </div>
+
+        <!-- MODE 1: MEMORY GAME -->
+        <div id="screen-memory" class="hidden space-y-4 my-auto">
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-amber-100">
+                <button onclick="showScreen('home')" class="text-slate-500 hover:text-slate-800 text-sm font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-chevron-left"></i> 返回主頁
+                </button>
+                <h3 class="font-bold text-amber-900">廚房速記對對碰</h3>
+                <span class="text-xs font-semibold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-md" id="memory-timer">配對數: 0/6</span>
+            </div>
+
+            <div id="memory-grid" class="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+                <!-- Memory Cards Dynamic Injection -->
+            </div>
+        </div>
+
+        <!-- MODE 2: LISTENING GAME -->
+        <div id="screen-listening" class="hidden space-y-6 my-auto max-w-2xl mx-auto w-full">
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-amber-100">
+                <button onclick="showScreen('home')" class="text-slate-500 hover:text-slate-800 text-sm font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-chevron-left"></i> 返回主頁
+                </button>
+                <h3 class="font-bold text-amber-900">烘焙大廚點餐戰</h3>
+                <span class="text-xs font-semibold bg-orange-100 text-orange-800 px-2.5 py-1 rounded-md" id="listening-score">關卡: 1/5</span>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 border-2 border-amber-200 shadow-md text-center space-y-6">
+                <div class="inline-block bg-amber-100 p-4 rounded-full text-amber-700 text-3xl mb-2">
+                    <i class="fa-solid fa-user-chef"></i>
+                </div>
+                <h4 class="text-lg font-bold text-slate-700">主廚說：請拿給我這個工具/食材！</h4>
+
+                <div class="flex justify-center gap-3">
+                    <button onclick="playListeningPrompt()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-3 rounded-full shadow-md text-lg transition flex items-center gap-2 pulse-animation">
+                        <i class="fa-solid fa-volume-high"></i> 播放語音
+                    </button>
+                    <button onclick="showListeningHint()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-semibold px-4 py-2 rounded-full transition">
+                        💡 提示
+                    </button>
+                </div>
+
+                <p id="listening-hint-text" class="text-xs text-amber-600 font-semibold min-h-[1.5rem]"></p>
+
+                <div id="listening-options" class="grid grid-cols-2 gap-4 pt-2">
+                    <!-- Dynamic Options -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODE 3: SPEAKING GAME -->
+        <div id="screen-speaking" class="hidden space-y-6 my-auto max-w-2xl mx-auto w-full">
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-amber-100">
+                <button onclick="showScreen('home')" class="text-slate-500 hover:text-slate-800 text-sm font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-chevron-left"></i> 返回主頁
+                </button>
+                <h3 class="font-bold text-amber-900">魔法食譜口說解鎖</h3>
+                <span class="text-xs font-semibold bg-rose-100 text-rose-800 px-2.5 py-1 rounded-md" id="recipe-progress">收集度: 0/3</span>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 border-2 border-rose-200 shadow-md text-center space-y-6">
+                <div class="bg-rose-50 p-4 rounded-xl inline-block">
+                    <span class="text-xs font-bold text-rose-600 uppercase tracking-wider block mb-1">目標食譜：海綿蛋糕</span>
+                    <h4 class="text-2xl font-black text-slate-800" id="target-word-en">cake flour</h4>
+                    <p class="text-slate-500 text-sm mt-1" id="target-word-zh">低筋麵粉</p>
+                </div>
+
+                <div class="flex justify-center items-center gap-4">
+                    <button onclick="speakTargetWord()" class="bg-amber-100 hover:bg-amber-200 text-amber-800 p-3 rounded-full transition text-lg" title="示範發音">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    
+                    <button id="mic-btn" onclick="toggleSpeechRecognition()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold w-20 h-20 rounded-full shadow-lg text-2xl flex items-center justify-center transition">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                </div>
+
+                <div class="min-h-[2rem]">
+                    <p id="speech-status" class="text-sm text-slate-500">按一下麥克風，唸出上面的英文單字</p>
+                    <p id="speech-result" class="text-sm font-bold text-rose-600 mt-1"></p>
+                </div>
+
+                <!-- Recipe Bowl Preview -->
+                <div class="border-t border-slate-100 pt-4">
+                    <p class="text-xs font-bold text-slate-400 mb-2">配料碗裝填進度</p>
+                    <div id="bowl-ingredients" class="flex justify-center gap-2">
+                        <!-- Ingredient Badges -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VOCABULARY BANK SCREEN -->
+        <div id="screen-vocab-bank" class="hidden space-y-4 my-auto">
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-amber-100">
+                <button onclick="showScreen('home')" class="text-slate-500 hover:text-slate-800 text-sm font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-chevron-left"></i> 返回主頁
+                </button>
+                <h3 class="font-bold text-amber-900">單字庫 (共 42 字)</h3>
+                <div class="flex gap-2">
+                    <button onclick="filterVocab('all')" class="text-xs px-2.5 py-1 rounded bg-amber-600 text-white">全部</button>
+                    <button onclick="filterVocab('tools')" class="text-xs px-2.5 py-1 rounded bg-slate-100 text-slate-600">工具</button>
+                    <button onclick="filterVocab('ingredients')" class="text-xs px-2.5 py-1 rounded bg-slate-100 text-slate-600">食材</button>
+                </div>
+            </div>
+
+            <div id="vocab-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <!-- Dynamic Injection -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-amber-900 text-amber-200/70 text-xs text-center py-4 mt-auto">
+        Baking Master 烘焙單字王 &copy; 高職英語教學輔助工具 (無後端輕量 Web App)
+    </footer>
+
+    <script>
+        // ==================== 1. VOCABULARY DATA (42 WORDS) ====================
+        const vocabularyData = [
+            // Tools (86頁)
+            { id: "t1", en: "lukewarm water", zh: "溫水", category: "tools", icon: "🥛" },
+            { id: "t2", en: "measuring cup", zh: "量杯", category: "tools", icon: "🥛" },
+            { id: "t3", en: "measuring spoon", zh: "量匙", category: "tools", icon: "🥄" },
+            { id: "t4", en: "mixer", zh: "攪拌機", category: "tools", icon: "⚙️" },
+            { id: "t5", en: "mixing bowl", zh: "攪拌碗", category: "tools", icon: "🥣" },
+            { id: "t6", en: "oven mitt", zh: "隔熱手套", category: "tools", icon: "🥊" },
+            { id: "t7", en: "oil brush", zh: "油刷", category: "tools", icon: "🖌️" },
+            { id: "t8", en: "spatula", zh: "刮刀", category: "tools", icon: "🪓" },
+            { id: "t9", en: "whisk", zh: "攪拌器 / 打蛋器", category: "tools", icon: "🥢" },
+            { id: "t10", en: "cooling rack", zh: "冷卻架", category: "tools", icon: "🏁" },
+            { id: "t11", en: "oven", zh: "烤箱", category: "tools", icon: "🔳" },
+            { id: "t12", en: "rolling pin", zh: "擀麵棍", category: "tools", icon: "🥖" },
+            { id: "t13", en: "maple syrup", zh: "楓糖漿", category: "ingredients", icon: "🍯" },
+            { id: "t14", en: "vanilla extract", zh: "香草精", category: "ingredients", icon: "🧪" },
+            { id: "t15", en: "sifter", zh: "篩網", category: "tools", icon: "🕸️" },
+            { id: "t16", en: "digital scale", zh: "電子秤", category: "tools", icon: "⚖️" },
+            { id: "t17", en: "apron", zh: "圍裙", category: "tools", icon: "🎽" },
+            { id: "t18", en: "baking tray", zh: "烤盤", category: "tools", icon: "🔲" },
+            { id: "t19", en: "baking sheet", zh: "烤盤", category: "tools", icon: "🔲" },
+            { id: "t20", en: "baking paper", zh: "烘焙紙", category: "tools", icon: "📜" },
+
+            // Ingredients (87頁)
+            { id: "i1", en: "baking powder", zh: "泡打粉、發粉", category: "ingredients", icon: "🧂" },
+            { id: "i2", en: "baking soda", zh: "蘇打粉；小蘇打", category: "ingredients", icon: "🧂" },
+            { id: "i3", en: "crystal sugar", zh: "冰糖", category: "ingredients", icon: "💎" },
+            { id: "i4", en: "rock sugar", zh: "冰糖", category: "ingredients", icon: "💎" },
+            { id: "i5", en: "granulated sugar", zh: "砂糖；白糖", category: "ingredients", icon: "🍬" },
+            { id: "i6", en: "white sugar", zh: "砂糖；白糖", category: "ingredients", icon: "🍬" },
+            { id: "i7", en: "brown sugar", zh: "紅糖；黑糖", category: "ingredients", icon: "🟤" },
+            { id: "i8", en: "shredded coconut", zh: "椰絲", category: "ingredients", icon: "🥥" },
+            { id: "i9", en: "whipped cream", zh: "生奶油；打發鮮奶油", category: "ingredients", icon: "🍦" },
+            { id: "i10", en: "cinnamon powder", zh: "肉桂粉", category: "ingredients", icon: "🪵" },
+            { id: "i11", en: "gelatin sheet", zh: "吉利丁片", category: "ingredients", icon: "📄" },
+            { id: "i12", en: "yeast", zh: "酵母", category: "ingredients", icon: "🧫" },
+            { id: "i13", en: "unsalted butter", zh: "無鹽奶油", category: "ingredients", icon: "🧈" },
+            { id: "i14", en: "shaved almond", zh: "杏仁薄片", category: "ingredients", icon: "🥜" },
+            { id: "i15", en: "egg white", zh: "蛋白", category: "ingredients", icon: "🥚" },
+            { id: "i16", en: "egg yolk", zh: "蛋黃", category: "ingredients", icon: "🍳" },
+            { id: "i17", en: "sesame seed", zh: "芝麻（籽）", category: "ingredients", icon: "🌱" },
+            { id: "i18", en: "rock salt", zh: "岩鹽", category: "ingredients", icon: "🧂" },
+            { id: "i19", en: "zest", zh: "檸檬皮；橙皮", category: "ingredients", icon: "🍋" },
+            { id: "i20", en: "whole milk", zh: "全脂牛奶", category: "ingredients", icon: "🥛" },
+            { id: "i21", en: "low-fat milk", zh: "低脂牛奶", category: "ingredients", icon: "🥛" },
+            { id: "i22", en: "skim milk", zh: "脫脂牛奶", category: "ingredients", icon: "🥛" },
+            { id: "i23", en: "all-purpose flour", zh: "中筋麵粉", category: "ingredients", icon: "🌾" },
+            { id: "i24", en: "plain flour", zh: "中筋麵粉", category: "ingredients", icon: "🌾" },
+            { id: "i25", en: "cake flour", zh: "低筋麵粉", category: "ingredients", icon: "🌾" },
+            { id: "i26", en: "bread flour", zh: "高筋麵粉", category: "ingredients", icon: "🌾" }
+        ];
+
+        // Global State
+        let currentScore = parseInt(localStorage.getItem('baking_score') || '0');
+        let slowSpeech = false;
+        let currentScreen = 'home';
+
+        // Update Score UI
+        document.getElementById('score').innerText = currentScore;
+
+        function addScore(points) {
+            currentScore += points;
+            localStorage.setItem('baking_score', currentScore);
+            document.getElementById('score').innerText = currentScore;
+        }
+
+        // Speech Synthesis (TTS)
+        function speakWord(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop active audio
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = slowSpeech ? 0.65 : 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleSlowSpeech() {
+            slowSpeech = !slowSpeech;
+            document.getElementById('slow-status').innerText = slowSpeech ? '開' : '關';
+            document.getElementById('slow-speech-btn').classList.toggle('bg-amber-700', slowSpeech);
+        }
+
+        // Screen Navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('[id^="screen-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+            currentScreen = screenId;
+
+            if (screenId === 'vocab-bank') renderVocabBank('all');
+        }
+
+        // ==================== MODE 1: MEMORY GAME LOGIC ====================
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedCount = 0;
+
+        function startMemoryGame() {
+            showScreen('memory');
+            matchedCount = 0;
+            document.getElementById('memory-timer').innerText = `配對數: 0/6`;
+
+            // Pick 6 random vocab items
+            const shuffledVocab = [...vocabularyData].sort(() => 0.5 - Math.random()).slice(0, 6);
+            
+            // Create pairs (1 English, 1 Chinese)
+            memoryCards = [];
+            shuffledVocab.forEach((item, index) => {
+                memoryCards.push({ pairId: index, type: 'en', text: item.en, full: item });
+                memoryCards.push({ pairId: index, type: 'zh', text: item.zh, full: item });
+            });
+
+            // Shuffle cards
+            memoryCards.sort(() => 0.5 - Math.random());
+
+            // Render Grid
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+            memoryCards.forEach((card, idx) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card-flip h-28 cursor-pointer';
+                cardEl.innerHTML = `
+                    <div class="card-inner w-full h-full relative rounded-xl shadow-md border-2 border-amber-200 bg-white flex items-center justify-center p-2 text-center" id="card-${idx}" onclick="flipMemoryCard(${idx})">
+                        <div class="card-front absolute inset-0 bg-amber-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+                            <i class="fa-solid fa-cookie"></i>
+                        </div>
+                        <div class="card-back absolute inset-0 bg-white rounded-lg flex flex-col items-center justify-center p-2">
+                            <span class="text-xs text-amber-600 font-bold mb-1">${card.type === 'en' ? 'EN' : '中文'}</span>
+                            <span class="font-bold text-slate-800 text-sm md:text-base">${card.text}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(cardEl);
+            });
+            flippedCards = [];
+        }
+
+        function flipMemoryCard(idx) {
+            const cardEl = document.getElementById(`card-${idx}`);
+            if (flippedCards.length >= 2 || cardEl.classList.contains('flipped')) return;
+
+            cardEl.classList.add('flipped');
+            flippedCards.push({ idx, data: memoryCards[idx] });
+
+            // Pronounce English word if flipped
+            if (memoryCards[idx].type === 'en') {
+                speakWord(memoryCards[idx].text);
+            }
+
+            if (flippedCards.length === 2) {
+                const [card1, card2] = flippedCards;
+                if (card1.data.pairId === card2.data.pairId) {
+                    // Match
+                    matchedCount++;
+                    addScore(10);
+                    document.getElementById('memory-timer').innerText = `配對數: ${matchedCount}/6`;
+                    flippedCards = [];
+
+                    if (matchedCount === 6) {
+                        setTimeout(() => {
+                            alert("🎉 恭喜完成廚房速記挑戰！獲得 60 積分！");
+                            showScreen('home');
+                        }, 500);
+                    }
+                } else {
+                    // No match
+                    setTimeout(() => {
+                        document.getElementById(`card-${card1.idx}`).classList.remove('flipped');
+                        document.getElementById(`card-${card2.idx}`).classList.remove('flipped');
+                        flippedCards = [];
+                    }, 1000);
+                }
+            }
+        }
+
+        // ==================== MODE 2: LISTENING GAME LOGIC ====================
+        let currentListeningTarget = null;
+        let listeningRound = 1;
+
+        function startListeningGame() {
+            showScreen('listening');
+            listeningRound = 1;
+            nextListeningQuestion();
+        }
+
+        function nextListeningQuestion() {
+            document.getElementById('listening-score').innerText = `關卡: ${listeningRound}/5`;
+            document.getElementById('listening-hint-text').innerText = '';
+
+            // Random target
+            currentListeningTarget = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+            
+            // Get 3 random distractors
+            const distractors = vocabularyData.filter(v => v.id !== currentListeningTarget.id)
+                .sort(() => 0.5 - Math.random()).slice(0, 3);
+            
+            const options = [...distractors, currentListeningTarget].sort(() => 0.5 - Math.random());
+
+            // Render options
+            const container = document.getElementById('listening-options');
+            container.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-xl p-4 text-center font-bold text-slate-700 transition flex flex-col items-center justify-center gap-1 shadow-sm';
+                btn.innerHTML = `
+                    <span class="text-2xl">${opt.icon}</span>
+                    <span class="text-sm md:text-base">${opt.zh}</span>
+                `;
+                btn.onclick = () => checkListeningAnswer(opt.id, btn);
+                container.appendChild(btn);
+            });
+
+            // Auto Play Prompt
+            setTimeout(playListeningPrompt, 300);
+        }
+
+        function playListeningPrompt() {
+            if (currentListeningTarget) {
+                speakWord(`Pass me the ${currentListeningTarget.en}, please.`);
+            }
+        }
+
+        function showListeningHint() {
+            if (currentListeningTarget) {
+                document.getElementById('listening-hint-text').innerText = `提示首字母: "${currentListeningTarget.en.charAt(0).toUpperCase()}"`;
+            }
+        }
+
+        function checkListeningAnswer(selectedId, btn) {
+            if (selectedId === currentListeningTarget.id) {
+                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                addScore(15);
+                setTimeout(() => {
+                    if (listeningRound < 5) {
+                        listeningRound++;
+                        nextListeningQuestion();
+                    } else {
+                        alert("🎉 太棒了！您通過了主廚聽力測試！");
+                        showScreen('home');
+                    }
+                }, 800);
+            } else {
+                btn.classList.add('bg-rose-100', 'border-rose-400', 'text-rose-800');
+                speakWord("Try again!");
+            }
+        }
+
+        // ==================== MODE 3: SPEAKING GAME LOGIC ====================
+        let currentSpeakingTarget = null;
+        let recipeProgress = 0;
+        let recognition = null;
+
+        function startSpeakingGame() {
+            showScreen('speaking');
+            recipeProgress = 0;
+            updateBowlUI();
+            nextSpeakingWord();
+        }
+
+        function nextSpeakingWord() {
+            currentSpeakingTarget = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+            document.getElementById('target-word-en').innerText = currentSpeakingTarget.en;
+            document.getElementById('target-word-zh').innerText = currentSpeakingTarget.zh;
+            document.getElementById('speech-result').innerText = '';
+            document.getElementById('speech-status').innerText = '按一下麥克風，唸出上面的英文單字';
+        }
+
+        function speakTargetWord() {
+            if (currentSpeakingTarget) speakWord(currentSpeakingTarget.en);
+        }
+
+        function toggleSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("您的瀏覽器暫不支援 Web Speech 語音辨識，建議使用 Chrome 瀏覽器操作！");
+                return;
+            }
+
+            if (recognition) {
+                recognition.stop();
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            const micBtn = document.getElementById('mic-btn');
+            micBtn.classList.add('animate-pulse', 'bg-red-500');
+            document.getElementById('speech-status').innerText = '聆聽中...請發音';
+
+            recognition.onresult = (event) => {
+                const spoken = event.results[0][0].transcript.toLowerCase().trim();
+                const target = currentSpeakingTarget.en.toLowerCase();
+                
+                document.getElementById('speech-result').innerText = `你說的是: "${spoken}"`;
+
+                // A1 Friendly Matcher: Simple inclusion or fuzzy match
+                if (spoken.includes(target) || target.includes(spoken) || levenshteinDistance(spoken, target) <= 2) {
+                    document.getElementById('speech-status').innerText = '✅ 發音成功！食材加入配料碗！';
+                    addScore(20);
+                    recipeProgress++;
+                    updateBowlUI();
+
+                    setTimeout(() => {
+                        if (recipeProgress < 3) {
+                            nextSpeakingWord();
+                        } else {
+                            alert("🎂 恭喜集滿 3 種食材，成功解鎖蛋糕食譜！");
+                            showScreen('home');
+                        }
+                    }, 1200);
+                } else {
+                    document.getElementById('speech-status').innerText = '❌ 發音不太像，再試一次吧！';
+                }
+            };
+
+            recognition.onerror = () => {
+                document.getElementById('speech-status').innerText = '未捕捉到聲音，請再試一次。';
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('animate-pulse', 'bg-red-500');
+                recognition = null;
+            };
+
+            recognition.start();
+        }
+
+        function updateBowlUI() {
+            document.getElementById('recipe-progress').innerText = `收集度: ${recipeProgress}/3`;
+            const container = document.getElementById('bowl-ingredients');
+            container.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const badge = document.createElement('div');
+                badge.className = `w-12 h-12 rounded-full border-2 flex items-center justify-center text-xl shadow-inner ${i < recipeProgress ? 'bg-amber-200 border-amber-500 text-amber-800' : 'bg-slate-100 border-slate-300 text-slate-300'}`;
+                badge.innerHTML = i < recipeProgress ? '<i class="fa-solid fa-check"></i>' : (i + 1);
+                container.appendChild(badge);
+            }
+        }
+
+        // Simple distance function for A1 speech tolerance
+        function levenshteinDistance(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1];
+                    else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        // ==================== VOCABULARY BANK ====================
+        function renderVocabBank(filter) {
+            const list = document.getElementById('vocab-list');
+            list.innerHTML = '';
+
+            const filtered = filter === 'all' ? vocabularyData : vocabularyData.filter(v => v.category === filter);
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex justify-between items-center';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${item.icon}</span>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm">${item.en}</h4>
+                            <p class="text-xs text-slate-500">${item.zh}</p>
+                        </div>
+                    </div>
+                    <button onclick="speakWord('${item.en}')" class="text-amber-600 hover:text-amber-800 p-2 text-base">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function filterVocab(cat) {
+            renderVocabBank(cat);
+        }
+    </script>
+</body>
+</html>
